@@ -136,7 +136,8 @@ $.widget("ui.video", {
 				width: self.options.width,
 				height: self.options.height,
 				poster: self.options.poster,
-				autoplay: self.options.autoPlay,
+				// Webkit does not consistently report timeupdate events when autoplay is used
+				autoplay: false,
 				controls: false,
 				loop: self.options.loop,
 				autobuffer: self.options.autoBuffer,
@@ -192,6 +193,10 @@ $.widget("ui.video", {
 			self.controls.delay(this.options.fadeDelay).fadeOut(this.options.fadeSpeed);
 
 			self.volumeSlider.slider('value', this.options.volume * 100);
+			
+			if(this.options.autoplay) {
+			    self.play();
+			}
 			
 		},
     	
