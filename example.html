@@ -9,8 +9,10 @@
 <title>jQuery UI Video test</title>
 <style>
 	#foo {
-		width: 640px;
-		height: 320px;
+		width: 853px;
+		height: 480px;
+		margin: 50px auto;
+		border: 1px solid #000;
 	}
 </style>
 <script>
@@ -18,9 +20,9 @@
     $('#switcher').themeswitcher();
 		$('#foo').video({
 			sources: [
-			{'title': 'http://stream.azatoth.net/video.ogv', 'type': 'video/ogg'},
-			{'title': 'http://stream.azatoth.net/video.mp4', 'type': 'video/mp4'}
-			]
+			{'title': 'video/trailer_480p.mov', 'type': 'video/mp4'}
+			],
+			poster: 'video/poster.png'
 		}
 		);
 
