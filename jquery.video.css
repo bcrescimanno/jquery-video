@@ -3,8 +3,9 @@
 	height: 40px;
 /*	background: #787878;*/
 	position: relative;
-	opacity: .8;
+	opacity: 0.8;
 }
+
 .video-progress {
 	font-family: monospace;
 	position: absolute;
