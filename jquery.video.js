@@ -100,7 +100,101 @@ $.widget("ui.video", {
             this._determineDimensions();
             this._loadInitialElementState();
 		},
+		
+		_determineDimensions: function() {
+    	    this.options.width = this.options.width || Math.max( this.element.width() , this.options.minWidth );
+    		this.options.height = this.options.height || Math.max( this.element.height() , this.options.minHeight );
+    	},
+    	
+    	_loadInitialElementState: function() {
+		    if(this.options.poster) {
+		        // Top support a poster in webkit, we have to use an image element
+		        var imgParams = {
+		            height: this.options.height,
+		            width: this.options.width,
+		            src: this.options.poster
+		        }
+		        
+		        this.poster = $("<img/>", imgParams)
+		        .click($.proxy(function() { 
+		            this._generateVideoElement();
+		            this.play();
+		        }, this))
+	            .appendTo(this.element);
+		    } else {
+		        this._generateVideoElement();
+		    }
+		},
+		
+		_generateVideoElement: function() {
+		    if(this.poster) {
+		        this.poster.remove();
+		    }
+		    var self = this;
 
+			var videoOptions = {
+				width: self.options.width,
+				height: self.options.height,
+				poster: self.options.poster,
+				autoplay: self.options.autoPlay,
+				controls: false,
+				loop: self.options.loop,
+				autobuffer: self.options.autoBuffer,
+				html: self.options.degrade
+			};
+			
+			self.videoElement = $('<video/>', videoOptions).appendTo( self.element );
+			
+			$.each( this.options.sources, function() {
+					self.videoElement.append( $('<source/>',{ 'src': this.title, 'type': this.type }) );
+				}
+			);
+			
+			var videoEvents = [
+				"abort",
+				"canplay",
+				"canplaythrough",
+				"canshowcurrentframe",
+				"dataunavailable",
+				"durationchange",
+				"emptied",
+				"empty",
+				"ended",
+				"error",
+				"loadedfirstframe",
+				"loadedmetadata",
+				"loadstart",
+				"pause",
+				"play",
+				"progress",
+				"ratechange",
+				"seeked",
+				"seeking",
+				"suspend",
+				"timeupdate",
+				"volumechange",
+				"waiting",
+				"resize"
+			];
+
+			$.each( videoEvents, function(){
+					if( self["_event_" + this] ) {
+						self.videoElement.bind( this + ".video", $.proxy(self["_event_" + this],self) );
+					} else {
+						//console.log( "event %s missing/not implemented", this);
+					}
+				}
+			);
+			self._createControls();
+
+			self.element.hover($.proxy(self._showControls,self), $.proxy(self._hideControls,self));
+
+			self.controls.delay(this.options.fadeDelay).fadeOut(this.options.fadeSpeed);
+
+			self.volumeSlider.slider('value', this.options.volume * 100);
+			
+		},
+    	
 		_createControls: function() {
 			var self = this;
 			this.controls = $('<div/>', {'class': 'ui-widget ui-widget-content ui-corner-all video-control'})
@@ -192,101 +286,6 @@ $.widget("ui.video", {
 			var mp = m >= 10 ? '' : '0';
 			return mp + m + ":" + sp + s;
 		},
-		
-		_loadInitialElementState: function() {
-		    if(this.options.poster) {
-		        // Top support a poster in webkit, we have to use an image element
-		        var imgParams = {
-		            height: this.options.height,
-		            width: this.options.width,
-		            src: this.options.poster
-		        }
-		        
-		        this.poster = $("<img/>", imgParams)
-		        .click($.proxy(function() { 
-		            this._generateVideoElement();
-		            this.play();
-		        }, this))
-	            .appendTo(this.element);
-		    } else {
-		        this._generateVideoElement();
-		    }
-		},
-		
-		_generateVideoElement: function() {
-		    if(this.poster) {
-		        this.poster.remove();
-		    }
-		    var self = this;
-
-			var videoOptions = {
-				width: self.options.width,
-				height: self.options.height,
-				poster: self.options.poster,
-				autoplay: self.options.autoPlay,
-				controls: false,
-				loop: self.options.loop,
-				autobuffer: self.options.autoBuffer,
-				html: self.options.degrade
-			};
-			
-			self.videoElement = $('<video/>', videoOptions).appendTo( self.element );
-			
-			$.each( this.options.sources, function() {
-					self.videoElement.append( $('<source/>',{ 'src': this.title, 'type': this.type }) );
-				}
-			);
-			
-			var videoEvents = [
-				"abort",
-				"canplay",
-				"canplaythrough",
-				"canshowcurrentframe",
-				"dataunavailable",
-				"durationchange",
-				"emptied",
-				"empty",
-				"ended",
-				"error",
-				"loadedfirstframe",
-				"loadedmetadata",
-				"loadstart",
-				"pause",
-				"play",
-				"progress",
-				"ratechange",
-				"seeked",
-				"seeking",
-				"suspend",
-				"timeupdate",
-				"volumechange",
-				"waiting",
-				"resize"
-			];
-
-			$.each( videoEvents, function(){
-					if( self["_event_" + this] ) {
-						self.videoElement.bind( this + ".video", $.proxy(self["_event_" + this],self) );
-					} else {
-						//console.log( "event %s missing/not implemented", this);
-					}
-				}
-			);
-			self._createControls();
-
-			self.element.hover($.proxy(self._showControls,self), $.proxy(self._hideControls,self));
-
-			self.controls.delay(this.options.fadeDelay).fadeOut(this.options.fadeSpeed);
-
-			self.volumeSlider.slider('value', this.options.volume * 100);
-			
-		},
-		
-		_determineDimensions: function() {
-		    this.options.width = this.options.width || Math.max( this.element.width() , this.options.minWidth );
-			this.options.height = this.options.height || Math.max( this.element.height() , this.options.minHeight );
-		},
-
 
 		// Events 
 		_event_progress: function(e) {
